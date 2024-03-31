@@ -1,10 +1,7 @@
 /*
-  Please add MCP_CAN_LIB to your library first........
-  MCP_CAN_LIB file in M5stack lib examples -> modules -> COMMU ->
-  MCP_CAN_lib.rar
+  CAN bus data logger for MAZDA MX-5
 */
 
-#include <M5Atom.h>
 #include "mazda_mx5_nc.h"
 #include "driver/twai.h"
 
@@ -25,6 +22,8 @@ static float AcceleratorPosition = 0;
 static char ShiftPosition = 'N';
 static int16_t SteeringAngle = 0;
 static float BrakePercentage = 0;
+static uint8_t clutch = 0;
+static uint8_t neutral = 0;
 
 int16_t bytesToInt(uint8_t raw[], int shift, int size) {
 
@@ -113,65 +112,64 @@ bool if_can_message_receive_is_pendig() {
   }
 }
 
-void mazdaMx5ShiftIndicator(twai_message_t* rx_frame) {
+void mazdaMx5EngineSpeed(twai_message_t* rx_frame) {
   static float GearRatio;
-  static uint8_t clutch = 0;
-  static uint8_t neutral = 0;
 
-  if (rx_frame->identifier == CAN_ID_TRANSMISSION) {
-    clutch = bitToUint(rx_frame->data, 15);
-    // Serial.printf("clutch = %d\n", clutch);
-    neutral = bitToUint(rx_frame->data, 14);
-    // Serial.printf("neutral = %d\n", neutral);
-  } else {  // Serial.printf("neutral = %d, clutch = %d, rxId = %03x, rxBuf[1] = %02x\n", neutral, clutch, rxId, bytesToInt(rxBuf, 1, 1));
-    EngineRPM = bytesToUint(rx_frame->data, 0, 2) / 4.00;
-    // Serial.printf("%5.2f rpm\n",EngineRPM);
-    Speed = (bytesToUint(rx_frame->data, 4, 2) / 100.00) - 100;
-    // Serial.printf("%3.2f km/h\n",Speed);
-    // Raw speed data is given in km/h with a 100 km/h offset.
-    AcceleratorPosition = bytesToUint(rx_frame->data, 6, 1) / 2.00;
-    // Serial.printf("Accel = %3.2f \%\n",AcceleratorPosition);
-    // This is a percentage, increments of 0.5%
-    if ((int)Speed != 0 && (int)EngineRPM != 0) {
-      // Serial.printf("%5.2f rpm, %3.2f km/h\n",EngineRPM,Speed);
-      GearRatio = (EngineRPM * 60) / FINAL_RATIO * (TYRE_OUTER_DIAMETER_16 / 100000) / Speed;
-    } else {
-      GearRatio = 0;
-    }
+  EngineRPM = bytesToUint(rx_frame->data, 0, 2) / 4.00;
+  // Serial.printf("%5.2f rpm\n",EngineRPM);
+  Speed = (bytesToUint(rx_frame->data, 4, 2) / 100.00) - 100;
+  // Serial.printf("%3.2f km/h\n",Speed);
+  // Raw speed data is given in km/h with a 100 km/h offset.
+  AcceleratorPosition = bytesToUint(rx_frame->data, 6, 1) / 2.00;
+  // Serial.printf("Accel = %3.2f \%\n",AcceleratorPosition);
+  // This is a percentage, increments of 0.5%
+  if ((int)Speed != 0 && (int)EngineRPM != 0) {
+    // Serial.printf("%5.2f rpm, %3.2f km/h\n",EngineRPM,Speed);
+    GearRatio = (EngineRPM * 60) / FINAL_RATIO * (TYRE_OUTER_DIAMETER_16 / 100000) / Speed;
+  } else {
+    GearRatio = 0;
+  }
 
-    if (clutch) {
-      ShiftPosition = 'C';
+  if (clutch) {
+    ShiftPosition = 'C';
+  } else {
+    if (neutral) {
+      ShiftPosition = 'N';
     } else {
-      if (neutral) {
+      if (GearRatio == 0) {
         ShiftPosition = 'N';
+      } else if (GearRatio < (GEAR_RATIO_6 + GEAR_RATIO_5) / 2) {
+        ShiftPosition = '6';
+      } else if (GearRatio < (GEAR_RATIO_5 + GEAR_RATIO_4) / 2) {
+        ShiftPosition = '5';
+      } else if (GearRatio < (GEAR_RATIO_4 + GEAR_RATIO_3) / 2) {
+        ShiftPosition = '4';
+      } else if (GearRatio < (GEAR_RATIO_3 + GEAR_RATIO_2) / 2) {
+        ShiftPosition = '3';
+      } else if (GearRatio < (GEAR_RATIO_2 + GEAR_RATIO_1) / 2) {
+        ShiftPosition = '2';
       } else {
-        if (GearRatio == 0) {
-          ShiftPosition = 'N';
-        } else if (GearRatio < (GEAR_RATIO_6 + GEAR_RATIO_5) / 2) {
-          ShiftPosition = '6';
-        } else if (GearRatio < (GEAR_RATIO_5 + GEAR_RATIO_4) / 2) {
-          ShiftPosition = '5';
-        } else if (GearRatio < (GEAR_RATIO_4 + GEAR_RATIO_3) / 2) {
-          ShiftPosition = '4';
-        } else if (GearRatio < (GEAR_RATIO_3 + GEAR_RATIO_2) / 2) {
-          ShiftPosition = '3';
-        } else if (GearRatio < (GEAR_RATIO_2 + GEAR_RATIO_1) / 2) {
-          ShiftPosition = '2';
-        } else {
-          ShiftPosition = '1';
-        }
+        ShiftPosition = '1';
       }
     }
   }
 }
 
-void mazdaMx5SteeringAngle(twai_message_t* rx_frame) {
+void mazdaMx5Transmission(twai_message_t* rx_frame) {
+
+  clutch = bitToUint(rx_frame->data, 15);
+  // Serial.printf("clutch = %d\n", clutch);
+  neutral = bitToUint(rx_frame->data, 14);
+  // Serial.printf("neutral = %d\n", neutral);
+}
+
+void mazdaMx5Steering(twai_message_t* rx_frame) {
 
   SteeringAngle = bytesToInt(rx_frame->data, 2, 2);
   // Serial.printf("Steering %-d\n",SteeringAngle);
 }
 
-void mazdaMx5BrakePressure(twai_message_t* rx_frame) {
+void mazdaMx5Brake(twai_message_t* rx_frame) {
   // BrakePressure = (3.4518689053 * bytesToInt(rxBuf, 0, 2) - 327.27) / 1000.00;
   // BrakePercentage = min(0.2 * (bytesToInt(rxBuf, 0, 2) - 102), 100);
   BrakePercentage = 0.2 * (bytesToInt(rx_frame->data, 0, 2) - 102);
@@ -183,12 +181,11 @@ void mazdaMx5BrakePressure(twai_message_t* rx_frame) {
 
 void mazdaMx5OutputCsv() {
   // Serial.println("mazdaMx5OutputCsv()");
-  Serial.printf("%3.1f, %4.1f, %c, %3.1f, %3.1f, %-2.1f\n", Speed, EngineRPM, ShiftPosition, AcceleratorPosition, BrakePercentage, SteeringAngle * MAX_STEERING_ANGLE / STEERING_MAX );
+  Serial.printf(", %3.1f, %4.1f, %c, %3.1f, %3.1f, %-2.1f\n", Speed, EngineRPM, ShiftPosition, AcceleratorPosition, BrakePercentage, SteeringAngle * MAX_STEERING_ANGLE / STEERING_MAX);
 }
 
 void setup() {
 
-  M5.begin();
   Serial.begin(115200);
   while (!Serial)
     ;
@@ -237,19 +234,21 @@ void loop() {
 
       switch (rx_frame.identifier) {
         case CAN_ID_ENGINE_SPEED:
+          mazdaMx5EngineSpeed(&rx_frame);
+          break;
         case CAN_ID_TRANSMISSION:
-          mazdaMx5ShiftIndicator(&rx_frame);
+          mazdaMx5Transmission(&rx_frame);
           break;
         case CAN_ID_STEERLING:
-          mazdaMx5SteeringAngle(&rx_frame);
+          mazdaMx5Steering(&rx_frame);
           break;
         case CAN_ID_BRAKE:
-          mazdaMx5BrakePressure(&rx_frame);
+          mazdaMx5Brake(&rx_frame);
           break;
         case CAN_ID_ENGINE:
           mazdaMx5OutputCsv();
           break;
-        // default:
+          // default:
           // Serial.printf("Unexpected can frame received. rx_frame.identifier=%3x\n", rx_frame.identifier);
       }
     }
