@@ -4,7 +4,7 @@ LogReaderInfo.push({
 	Caption:	"Mazda Mx-5 (*.mx5)",
 	Filter:		"*.mx5;*.mx5.gz",
 	ReaderFunc:	"ReadMx5Log",
-	Priority:	0x10000000,
+	Priority:	0x4d582d35,
 });
 
 function ReadMx5Log( Files ){
@@ -16,9 +16,6 @@ function ReadMx5Log( Files ){
 	Log.Accel	= [];
 	Log.Brake	= [];
 	Log.Angle	= [];
-	Log.LapTime	= [];
-	Log.Gx		= [];
-	Log.Gy		= [];
 
 	var	Cnt = 0;
 	
@@ -42,9 +39,6 @@ function ReadMx5Log( Files ){
 			Log.Accel[Cnt] = Param[4];
 			Log.Brake[Cnt] = Param[5];
 			Log.Angle[Cnt] = Param[6];
-			Log.LapTime[Cnt] = undefined;
-			Log.Gx[Cnt] = undefined;
-			Log.Gy[Cnt] = undefined;
 
 			++Cnt;
 		}
