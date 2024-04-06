@@ -2,7 +2,7 @@
 
 LogReaderInfo.push({
 	Caption:	"Mazda Mx-5 (*.mx5)",
-	Filter:		"*.mx5;*.mx5.gz",
+	Filter:		"*.txt;*.txt.gz",
 	ReaderFunc:	"ReadMx5Log",
 	Priority:	0x4d582d35,
 });
