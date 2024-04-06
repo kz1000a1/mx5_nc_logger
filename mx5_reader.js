@@ -1,7 +1,7 @@
 /// MAZDA MX-5 3rd gen log リーダ ////////////////////////////////////////////////////////
 
 LogReaderInfo.push({
-	Caption:	"Mazda Mx-5 (*.mx5)",
+	Caption:	"Mazda Mx-5 (*.txt)",
 	Filter:		"*.txt;*.txt.gz",
 	ReaderFunc:	"ReadMx5Log",
 	Priority:	0x4d582d35,
