@@ -19,7 +19,7 @@ static bool driver_installed = false;
 static float EngineRPM = 0;
 static float Speed = 0;
 static float AcceleratorPosition = 0;
-static char ShiftPosition = 'N';
+static uint8_t ShiftPosition = 0;
 static int16_t SteeringAngle = 0;
 static float BrakePercentage = 0;
 static uint8_t clutch = 0;
@@ -131,25 +131,25 @@ void mazdaMx5EngineSpeed(twai_message_t* rx_frame) {
   }
 
   if (clutch) {
-    ShiftPosition = 'C';
+    ShiftPosition = 8;
   } else {
     if (neutral) {
-      ShiftPosition = 'N';
+      ShiftPosition = 0;
     } else {
       if (GearRatio == 0) {
-        ShiftPosition = 'N';
+        ShiftPosition = 0;
       } else if (GearRatio < (GEAR_RATIO_6 + GEAR_RATIO_5) / 2) {
-        ShiftPosition = '6';
+        ShiftPosition = 6;
       } else if (GearRatio < (GEAR_RATIO_5 + GEAR_RATIO_4) / 2) {
-        ShiftPosition = '5';
+        ShiftPosition = 5;
       } else if (GearRatio < (GEAR_RATIO_4 + GEAR_RATIO_3) / 2) {
-        ShiftPosition = '4';
+        ShiftPosition = 4;
       } else if (GearRatio < (GEAR_RATIO_3 + GEAR_RATIO_2) / 2) {
-        ShiftPosition = '3';
+        ShiftPosition = 3;
       } else if (GearRatio < (GEAR_RATIO_2 + GEAR_RATIO_1) / 2) {
-        ShiftPosition = '2';
+        ShiftPosition = 2;
       } else {
-        ShiftPosition = '1';
+        ShiftPosition = 1;
       }
     }
   }
@@ -175,6 +175,9 @@ void mazdaMx5Brake(twai_message_t* rx_frame) {
   BrakePercentage = 0.2 * (bytesToInt(rx_frame->data, 0, 2) - 102);
   if (100 < BrakePercentage) {
     BrakePercentage = 100;
+  }
+  if (BrakePercentage < 0) {
+    BrakePercentage = 0;
   }
   // Serial.printf("Brake = %3.2f \%\n",BrakePercentage);
 }
