@@ -67,20 +67,6 @@ uint16_t bytesToUint(uint8_t raw[], int shift, int size) {
   // return &raw[shift];
 }
 
-uint16_t bitsToUint(uint8_t raw[], int shift, int size) {
-
-  uint16_t result = 0;
-
-  for (int i = shift; i < shift + size; i++) {
-    result = result << 1;
-    result += bitToUint(raw, i);
-  }
-
-  return result;
-
-  // return &raw[shift];
-}
-
 uint16_t bitToUint(uint8_t raw[], int shift) {
   uint16_t result;
   // Serial.printf("raw[%d]=%02X,>> %d = 0x%02X, & 0xFE\n",(shift - 1) / 8,raw[(shift - 1) / 8],7 - (shift - 1) % 8,(raw[(shift - 1) / 8] >> 7 - (shift - 1) % 8));
@@ -94,6 +80,20 @@ uint16_t bitToUint(uint8_t raw[], int shift) {
     result = (raw[(shift - 1) / 8] & 0xFE);
   }*/
   return result;
+}
+
+uint16_t bitsToUint(uint8_t raw[], int shift, int size) {
+
+  uint16_t result = 0;
+
+  for (int i = shift; i < shift + size; i++) {
+    result = result << 1;
+    result += bitToUint(raw, i);
+  }
+
+  return result;
+
+  // return &raw[shift];
 }
 
 void mazdaMx5EngineSpeed(uint8_t* rx_msg_data) {
