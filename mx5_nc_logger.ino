@@ -184,7 +184,7 @@ void mazdaMx5Brake(twai_message_t* rx_frame) {
 
 void mazdaMx5OutputCsv() {
   // Serial.println("mazdaMx5OutputCsv()");
-  Serial.printf(", %3.1f, %4.1f, %d, %3.1f, %3.1f, %-2.1f\n", Speed, EngineRPM, ShiftPosition, AcceleratorPosition, BrakePercentage, SteeringAngle * MAX_STEERING_ANGLE / STEERING_MAX);
+  Serial.printf(", %.1f, %.1f, %d, %.1f, %.1f, %-.1f\n", Speed, EngineRPM, ShiftPosition, AcceleratorPosition, BrakePercentage, SteeringAngle * MAX_STEERING_ANGLE / STEERING_MAX);
 }
 
 void setup() {
