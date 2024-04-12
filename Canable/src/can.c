@@ -6,7 +6,7 @@
 #include "usbd_cdc_if.h"
 #include "can.h"
 #include "error.h"
-#include "subaru_levorg_vnx.h"
+#include "mazda_mx5_nc.h"
 
 
 // Private variables
