@@ -176,7 +176,7 @@ int main(void)
         if(is_can_msg_pending(CAN_RX_FIFO0)){
             can_rx(&rx_msg_header, rx_msg_data);
 
-            switch (rx_frame.identifier) {
+            switch (rx_msg_header.StdId) {
                 case CAN_ID_ENGINE_SPEED:
                     mazdaMx5EngineSpeed(&rx_frame);
                     break;
