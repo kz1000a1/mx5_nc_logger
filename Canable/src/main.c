@@ -1,6 +1,7 @@
 /*
   CAN bus data logger for MAZDA MX-5
 */
+#include <math.h>
 
 #include "stm32f0xx.h"
 #include "stm32f0xx_hal.h"
