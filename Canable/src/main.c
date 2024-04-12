@@ -178,16 +178,16 @@ int main(void)
 
             switch (rx_msg_header.StdId) {
                 case CAN_ID_ENGINE_SPEED:
-                    mazdaMx5EngineSpeed(&rx_frame);
+                    mazdaMx5EngineSpeed(rx_msg_data);
                     break;
                 case CAN_ID_TRANSMISSION:
-                    mazdaMx5Transmission(&rx_frame);
+                    mazdaMx5Transmission(rx_msg_data);
                     break;
                 case CAN_ID_STEERLING:
-                    mazdaMx5Steering(&rx_frame);
+                    mazdaMx5Steering(rx_msg_data);
                     break;
                 case CAN_ID_BRAKE:
-                    mazdaMx5Brake(&rx_frame);
+                    mazdaMx5Brake(rx_msg_data);
                     break;
                 case CAN_ID_ENGINE:
                     mazdaMx5OutputCsv();
