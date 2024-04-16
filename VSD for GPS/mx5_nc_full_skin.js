@@ -303,7 +303,7 @@ function Draw(){
 	);
 	
 	// アクセルメーター針
-	if((360 - MeterCenter - 1) <= Log.Accel / Log.Max.Accel * (MeterCenter - MeterMin - 1)){
+	if((360 - MeterCenter - 1) <= Log.Accel / AccelMeterParam.MaxVal * (MeterCenter - MeterMin - 1)){
 		Vsd.DrawArc(
 			AccelMeterParam.X, AccelMeterParam.Y, MeterR, MeterR,
 			MeterR * 0.93, MeterR * 0.93, MeterCenter,
